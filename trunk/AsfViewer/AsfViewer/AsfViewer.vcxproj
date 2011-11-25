@@ -41,6 +41,8 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(ConfigurationName)</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(ConfigurationName)</OutDir>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\boost\boost_1_47;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\boost\boost_1_47\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -77,6 +79,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AsfLibraryWrapper.cpp" />
+    <ClCompile Include="AsfLibrary\AsfFile.cpp" />
+    <ClCompile Include="AsfLibrary\AsfFileUtilities.cpp" />
+    <ClCompile Include="AsfLibrary\AsfFrame.cpp" />
+    <ClCompile Include="AsfLibrary\AsfHeader.cpp" />
     <ClCompile Include="asfviewer.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_asfviewer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -115,9 +122,15 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <SubType>Designer</SubType>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AsfLibraryWrapper.h" />
+    <ClInclude Include="AsfLibrary\AsfFile.h" />
+    <ClInclude Include="AsfLibrary\AsfFrame.h" />
+    <ClInclude Include="AsfLibrary\AsfHeader.h" />
+    <ClInclude Include="AsfLibrary\AsfFileUtilities.h" />
     <ClInclude Include="GeneratedFiles\ui_asfviewer.h" />
   </ItemGroup>
   <ItemGroup>
