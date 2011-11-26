@@ -16,6 +16,7 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QProgressBar>
 #include "ui_asfviewer.h"
+#include "AsfLibraryWrapper.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -36,6 +37,7 @@ public:
 
 private slots:
 	void open();
+	void closeFile();
 	void zoomIn();
 	void zoomOut();
 	void normalSize();
@@ -50,13 +52,21 @@ private slots:
 private:
 	void createActions();
 	void createMenus();
+	void createCentralWidget();
+	void createStatusBar();
 	void updateActions();
+	void updateButtonsRow();
+	void updateAllUi();
+	void updateCurrentFrame();
 	void scaleImage(double factor);
 	void adjustScrollBar(QScrollBar *scrollBar, double factor);
-	void updateCurrentFrame();
-	void updateCurrentFrameNumber();
 	void goToFrame(const int frameNumber);
 
+	double scaleFactor;
+	QVector<QImage*>::const_iterator currentFrame;
+	int currentFrameNumber;
+	AsfFile* asfFile; // keep data in pool, all usage throw iterator
+	bool isFileOpen;
 
 	QLabel *imageLabel;
 	QScrollArea *scrollArea;
@@ -66,16 +76,13 @@ private:
 	QPushButton *lastFrameBtn;
 	QLineEdit *frameNumEdt;
 
-	double scaleFactor;
-	QVector<QImage*>::const_iterator currentFrame;
-	int currentFrameNumber;
-	QVector<QImage*> asfFile; // keep data in pool, all usage throw iterators
 	QTimer *timer;
 	QLabel *lblFrameCount;
 	QLabel *lblRows;
 	QLabel *lblCols;
 
 	QAction *openAct;
+	QAction *closeAct;
 	QAction *exitAct;
 	QAction *zoomInAct;
 	QAction *zoomOutAct;

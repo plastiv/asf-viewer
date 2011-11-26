@@ -1,28 +1,197 @@
 #include "asfviewer.h"
-#include "AsfLibrary/AsfFile.h"
-#include "AsfLibrary/AsfFileUtilities.h"
-#include "AsfLibraryWrapper.h"
-
-//uchar imagio [20][20];
-//for (int i = 0; i < 20; i++)
-//	for (int j = 0; j < 20; j++)
-//		imagio[i][j] = qrand() % 256;
-//QVector<QRgb> colorTable;
-//for (int i = 0; i < 256; i++)
-//	colorTable.push_back(QColor(i, i, i).rgb());
-//QImage image((uchar*)imagio, 20, 20, 20, QImage::Format_Indexed8); // was incorrect
-//image.setColorTable(colorTable);
-//
-//
-//QImage myImage("123.jpg");
-//
-//ui.setupUi(this);
-//ui.label->setScaledContents(true);
-//ui.label->setPixmap(QPixmap::fromImage(image));
-//ui.label->resize(500,500);
 
 AsfViewer::AsfViewer(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
+{
+	// build ui and controls
+	createActions();
+	createMenus();
+	createCentralWidget();
+	createStatusBar();
+
+	isFileOpen = false; // flag is using for enabling/disabling buttons
+	timer = new QTimer(this); // change frames automatically
+	connect(timer, SIGNAL(timeout()), this, SLOT(goToNextFrame()));
+
+	setWindowTitle(tr("Asf Viewer"));
+	resize(400, 400);
+
+	statusBar()->showMessage( tr("Open file"), 5000 );
+}
+
+void AsfViewer::open()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+		tr("Open File"), QDir::currentPath(),"*.asf *.gz");
+
+	if (!fileName.isEmpty()) {
+		// file selected
+		timer->stop();
+
+		if (isFileOpen) {
+			// delete previous file
+			asfFile->clear();
+			delete asfFile;
+		}
+
+		asfFile = new AsfFile(fileName); // open file // TODO : check exeption here
+		isFileOpen = true;
+
+		goToFirstFrame();
+		updateAllUi();
+
+		fitToWindowAct->trigger(); // force image to fit window
+		scaleFactor = 1.0; // reset Zoom to 100%
+		statusBar()->showMessage(tr("Opened '%1'").arg(fileName), 2000);
+		
+		/*if (image.isNull()) {
+			QMessageBox::information(this, tr("Asf Viewer"),
+				tr("Cannot load %1.").arg(fileName));
+			return;
+		}*/
+	}
+}
+
+void AsfViewer::closeFile()
+{
+	timer->stop(); // in case autoplay is active
+
+	asfFile->clear(); // delete opened file
+	delete asfFile;
+	isFileOpen = false;
+
+	updateAllUi();
+	statusBar()->showMessage( tr("File closed"), 5000 );
+}
+
+void AsfViewer::zoomIn()
+{
+	scaleImage(1.25);
+}
+
+void AsfViewer::zoomOut()
+{
+	scaleImage(0.8);
+}
+
+void AsfViewer::normalSize()
+{
+	imageLabel->adjustSize();
+	scaleFactor = 1.0;
+}
+
+void AsfViewer::fitToWindow()
+{
+	bool fitToWindow = fitToWindowAct->isChecked();
+	scrollArea->setWidgetResizable(fitToWindow);
+	if (!fitToWindow) {
+		normalSize();
+	}
+	updateActions();
+}
+
+void AsfViewer::scaleImage(double factor)
+{
+	Q_ASSERT(imageLabel->pixmap());
+	scaleFactor *= factor;
+	imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
+
+	adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
+	adjustScrollBar(scrollArea->verticalScrollBar(), factor);
+
+	zoomInAct->setEnabled(scaleFactor < 3.0);
+	zoomOutAct->setEnabled(scaleFactor > 0.333);
+}
+
+void AsfViewer::adjustScrollBar(QScrollBar *scrollBar, double factor)
+{
+	scrollBar->setValue(int(factor * scrollBar->value()
+		+ ((factor - 1) * scrollBar->pageStep()/2)));
+}
+
+void AsfViewer::about()
+{
+	QMessageBox::about(this, tr("About Asf Viewer"),
+		tr("<p>The <b>Asf Viewer</b> read .asf files, that are simple "
+		"containers for a gray scaled frames (kind of video file). </p><p>"
+		"Made by Sergii Pechenizkyi for Codeminders test task.</p>"));
+}
+
+void AsfViewer::autoPlayFrames()
+{
+	timer->start(50); // close to 24 frames per second
+}
+
+void AsfViewer::createActions()
+{
+	openAct = new QAction(tr("&Open..."), this);
+	openAct->setShortcut(tr("Ctrl+O"));
+	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+	closeAct = new QAction(tr("&Close..."), this);
+	closeAct->setEnabled(false);
+	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeFile()));
+
+	exitAct = new QAction(tr("E&xit"), this);
+	exitAct->setShortcut(tr("Ctrl+Q"));
+	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+	zoomInAct = new QAction(tr("Zoom &In (25%)"), this);
+	zoomInAct->setShortcut(tr("Ctrl++"));
+	zoomInAct->setEnabled(false);
+	connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+	zoomOutAct = new QAction(tr("Zoom &Out (25%)"), this);
+	zoomOutAct->setShortcut(tr("Ctrl+-"));
+	zoomOutAct->setEnabled(false);
+	connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
+
+	normalSizeAct = new QAction(tr("&Normal Size"), this);
+	normalSizeAct->setShortcut(tr("Ctrl+0"));
+	normalSizeAct->setEnabled(false);
+	connect(normalSizeAct, SIGNAL(triggered()), this, SLOT(normalSize()));
+
+	fitToWindowAct = new QAction(tr("&Fit to Window"), this);
+	fitToWindowAct->setEnabled(false);
+	fitToWindowAct->setCheckable(true);
+	fitToWindowAct->setShortcut(tr("Ctrl+F"));
+	connect(fitToWindowAct, SIGNAL(triggered()), this, SLOT(fitToWindow()));
+
+	autoPlayAct = new QAction(tr("Auto &Play"), this);
+	autoPlayAct->setShortcut(tr("Ctrl+P"));
+	autoPlayAct->setEnabled(false);
+	connect(autoPlayAct, SIGNAL(triggered()), this, SLOT(autoPlayFrames()));
+
+	aboutAct = new QAction(tr("&About"), this);
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+}
+
+void AsfViewer::createMenus()
+{
+	fileMenu = new QMenu(tr("&File"), this);
+	fileMenu->addAction(openAct);
+	fileMenu->addAction(closeAct);
+	fileMenu->addSeparator();
+	fileMenu->addAction(exitAct);
+
+	viewMenu = new QMenu(tr("&View"), this);
+	viewMenu->addAction(zoomInAct);
+	viewMenu->addAction(zoomOutAct);
+	viewMenu->addAction(normalSizeAct);
+	viewMenu->addSeparator();
+	viewMenu->addAction(fitToWindowAct);
+	viewMenu->addAction(autoPlayAct);
+
+	helpMenu = new QMenu(tr("&Help"), this);
+	helpMenu->addAction(aboutAct);
+
+	menuBar()->addMenu(fileMenu);
+	menuBar()->addMenu(viewMenu);
+	menuBar()->addMenu(helpMenu);
+}
+
+void AsfViewer::createCentralWidget()
 {
 	imageLabel = new QLabel;
 	imageLabel->setBackgroundRole(QPalette::Base);
@@ -64,18 +233,11 @@ AsfViewer::AsfViewer(QWidget *parent, Qt::WFlags flags)
 
 	QWidget * centWidget = new QWidget;
 	centWidget->setLayout(mainLayout);
-
 	setCentralWidget(centWidget);
+}
 
-	createActions();
-	createMenus();
-
-	//statusBar()->showMessage("Open file", 10000);
-	setWindowTitle(tr("Asf Viewer"));
-	resize(500, 400);
-
-	// FIXME: trash temp code to end
-	///////////////////////////////////////////////
+void AsfViewer::createStatusBar()
+{
 	QStatusBar *statusBar = this->statusBar();
 
 	lblFrameCount = new QLabel( tr("  FRAMES TOTAL  ") );
@@ -98,284 +260,59 @@ AsfViewer::AsfViewer(QWidget *parent, Qt::WFlags flags)
 	lblCols->setText( tr("COLS %1").arg(0) );
 	lblCols->setToolTip( tr("Count of pixel columns in one frame.") );
 	statusBar->addPermanentWidget( lblCols );
-
-	statusBar->showMessage( tr("Open file"), 5000 );
-
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(goToNextFrame()));
-
-}
-
-void AsfViewer::open()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,
-		tr("Open File"), QDir::currentPath(),"*.asf *.gz");
-	if (!fileName.isEmpty()) {
-		if (!asfFile.empty())
-		{
-			asfFile.clear();
-		}
-		AsfProperty myProperty;
-		if (fileName.contains(".gz"))
-			asfFile = *getFramesFromGZipFile(fileName, myProperty);
-		else
-			asfFile = *getFramesFromFile(fileName, myProperty);
-
-		lblFrameCount->setText( tr("COUNT %1").arg(myProperty.count) );
-		lblRows->setText( tr("ROWS %1").arg(myProperty.rows) );
-		lblCols->setText( tr("COLS %1").arg(myProperty.cols) );
-		statusBar()->showMessage(tr("Opened '%1'").arg(fileName), 2000);
-		/*if (image.isNull()) {
-			QMessageBox::information(this, tr("Asf Viewer"),
-				tr("Cannot load %1.").arg(fileName));
-			return;
-		}*/
-
-		goToFirstFrame();
-		scaleFactor = 1.0;
-
-		frameNumEdt->setEnabled(true);
-		fitToWindowAct->setEnabled(true);
-		autoPlayAct->setEnabled(true);
-		fitToWindowAct->trigger();
-		updateActions();
-		
-		if (!fitToWindowAct->isChecked())
-			imageLabel->adjustSize();
-
-	}
-}
-
-void AsfViewer::zoomIn()
-{
-	scaleImage(1.25);
-}
-
-void AsfViewer::zoomOut()
-{
-	scaleImage(0.8);
-}
-
-void AsfViewer::normalSize()
-{
-	imageLabel->adjustSize();
-	scaleFactor = 1.0;
-}
-
-void AsfViewer::fitToWindow()
-{
-	bool fitToWindow = fitToWindowAct->isChecked();
-	scrollArea->setWidgetResizable(fitToWindow);
-	if (!fitToWindow) {
-		normalSize();
-	}
-	updateActions();
-}
-
-void AsfViewer::about()
-{
-	QMessageBox::about(this, tr("About Asf Viewer"),
-		tr("<p>The <b>Asf Viewer</b> read .asf files, that are simple "
-		"containers for a gray scaled frames (kind of video file). </p><p>"
-		"Made by Sergii Pechenizkyi for Codeminders test task.</p>"));
-}
-
-void AsfViewer::createActions()
-{
-	openAct = new QAction(tr("&Open..."), this);
-	openAct->setShortcut(tr("Ctrl+O"));
-	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-	exitAct = new QAction(tr("E&xit"), this);
-	exitAct->setShortcut(tr("Ctrl+Q"));
-	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-	zoomInAct = new QAction(tr("Zoom &In (25%)"), this);
-	zoomInAct->setShortcut(tr("Ctrl++"));
-	zoomInAct->setEnabled(false);
-	connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
-
-	zoomOutAct = new QAction(tr("Zoom &Out (25%)"), this);
-	zoomOutAct->setShortcut(tr("Ctrl+-"));
-	zoomOutAct->setEnabled(false);
-	connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
-
-	normalSizeAct = new QAction(tr("&Normal Size"), this);
-	normalSizeAct->setShortcut(tr("Ctrl+0"));
-	normalSizeAct->setEnabled(false);
-	connect(normalSizeAct, SIGNAL(triggered()), this, SLOT(normalSize()));
-
-	fitToWindowAct = new QAction(tr("&Fit to Window"), this);
-	fitToWindowAct->setEnabled(false);
-	fitToWindowAct->setCheckable(true);
-	fitToWindowAct->setShortcut(tr("Ctrl+F"));
-	connect(fitToWindowAct, SIGNAL(triggered()), this, SLOT(fitToWindow()));
-
-	autoPlayAct = new QAction(tr("Auto &Play"), this);
-	autoPlayAct->setShortcut(tr("Ctrl+P"));
-	autoPlayAct->setEnabled(false);
-	connect(autoPlayAct, SIGNAL(triggered()), this, SLOT(autoPlayFrames()));
-
-	aboutAct = new QAction(tr("&About"), this);
-	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-}
-
-void AsfViewer::createMenus()
-{
-	fileMenu = new QMenu(tr("&File"), this);
-	fileMenu->addAction(openAct);
-	fileMenu->addSeparator();
-	fileMenu->addAction(exitAct);
-
-	viewMenu = new QMenu(tr("&View"), this);
-	viewMenu->addAction(zoomInAct);
-	viewMenu->addAction(zoomOutAct);
-	viewMenu->addAction(normalSizeAct);
-	viewMenu->addSeparator();
-	viewMenu->addAction(fitToWindowAct);
-	viewMenu->addAction(autoPlayAct);
-
-	helpMenu = new QMenu(tr("&Help"), this);
-	helpMenu->addAction(aboutAct);
-
-	menuBar()->addMenu(fileMenu);
-	menuBar()->addMenu(viewMenu);
-	menuBar()->addMenu(helpMenu);
-}
-
-void AsfViewer::updateActions()
-{
-	zoomInAct->setEnabled(!fitToWindowAct->isChecked());
-	zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
-	normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
-}
-
-void AsfViewer::scaleImage(double factor)
-{
-	Q_ASSERT(imageLabel->pixmap());
-	scaleFactor *= factor;
-	imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
-
-	adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
-	adjustScrollBar(scrollArea->verticalScrollBar(), factor);
-
-	zoomInAct->setEnabled(scaleFactor < 3.0);
-	zoomOutAct->setEnabled(scaleFactor > 0.333);
-}
-
-void AsfViewer::adjustScrollBar(QScrollBar *scrollBar, double factor)
-{
-	scrollBar->setValue(int(factor * scrollBar->value()
-		+ ((factor - 1) * scrollBar->pageStep()/2)));
-}
-
-AsfViewer::~AsfViewer()
-{
-
 }
 
 void AsfViewer::goToFirstFrame()
 {
-	firstFrameBtn->setEnabled(false);
-	prevFrameBtn->setEnabled(false);
-
-	lastFrameBtn->setEnabled(true);
-	nextFrameBtn->setEnabled(true);
-
-	currentFrame = asfFile.begin();
+	currentFrame = asfFile->begin();
 	updateCurrentFrame();
 	currentFrameNumber = 1;
-	updateCurrentFrameNumber();
+	updateButtonsRow();
 }
 
 void AsfViewer::goToPrevFrame()
 {
-	if (!lastFrameBtn->isEnabled())
-		lastFrameBtn->setEnabled(true);
-
-	if (!nextFrameBtn->isEnabled())
-		nextFrameBtn->setEnabled(true);
-
 	--currentFrame;
-	if(currentFrame == asfFile.begin()) {
-		prevFrameBtn->setEnabled(false);
-		firstFrameBtn->setEnabled(false);
-	}
-
 	updateCurrentFrame();
 	--currentFrameNumber;
-	updateCurrentFrameNumber();
+	updateButtonsRow();
 }
 
 void AsfViewer::goToNextFrame()
 {
-	if (!firstFrameBtn->isEnabled())
-		firstFrameBtn->setEnabled(true);
-	
-	if (!prevFrameBtn->isEnabled())
-		prevFrameBtn->setEnabled(true);
-
 	++currentFrame;
-	if(currentFrame+1 == asfFile.end()) {
-		timer->stop();
-		nextFrameBtn->setEnabled(false);
-		lastFrameBtn->setEnabled(false);
-	}
-
 	updateCurrentFrame();
 	++currentFrameNumber;
-	updateCurrentFrameNumber();
+	updateButtonsRow();
 }
 
 void AsfViewer::goToLastFrame()
 {
-	firstFrameBtn->setEnabled(true);
-	prevFrameBtn->setEnabled(true);
-
-	lastFrameBtn->setEnabled(false);
-	nextFrameBtn->setEnabled(false);
-
-	currentFrame = asfFile.end() - 1;
+	currentFrame = asfFile->end() - 1;
 	updateCurrentFrame();
-	currentFrameNumber = asfFile.size();
-	updateCurrentFrameNumber();
+	currentFrameNumber = asfFile->size();
+	updateButtonsRow();
 }
 
 void AsfViewer::goToFrame(const int frameNumber)
 {
-	if (frameNumber > 0 && frameNumber < asfFile.size() + 1)
+	if (frameNumber > 0 && frameNumber < asfFile->size() + 1)
 	{
 		if (frameNumber == 1)
 			goToFirstFrame();
-		else if (frameNumber == asfFile.size())
+		else if (frameNumber == asfFile->size())
 			goToLastFrame();
 		else
 		{
-			firstFrameBtn->setEnabled(true);
-			prevFrameBtn->setEnabled(true);
-			lastFrameBtn->setEnabled(true);
-			nextFrameBtn->setEnabled(true);
-
-			currentFrame = asfFile.begin() + frameNumber - 1;
+			currentFrame = asfFile->begin() + frameNumber - 1;
 			updateCurrentFrame();
 			currentFrameNumber = frameNumber;
-			updateCurrentFrameNumber();
+			updateButtonsRow();
 		}
 	}
 	else
-		statusBar()->showMessage(tr("Out of range [1,%1]").arg(asfFile.size()), 5000);
+		statusBar()->showMessage(tr("Out of range [1,%1]").arg(asfFile->size()), 5000);
 
-}
-
-void AsfViewer::updateCurrentFrame()
-{
-	imageLabel->setPixmap(QPixmap::fromImage(**currentFrame));
-}
-
-void AsfViewer::updateCurrentFrameNumber()
-{
-	frameNumEdt->setText(QString::number(currentFrameNumber));
 }
 
 void AsfViewer::numberEditChanged()
@@ -385,7 +322,88 @@ void AsfViewer::numberEditChanged()
 	goToFrame(frameNum);
 }
 
-void AsfViewer::autoPlayFrames()
+void AsfViewer::updateActions()
 {
-     timer->start(50); // close to 24 frames per second
+	if (isFileOpen)
+	{
+		fitToWindowAct->setEnabled(true);
+		zoomInAct->setEnabled(!fitToWindowAct->isChecked());
+		zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
+		normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
+		autoPlayAct->setEnabled(true);
+		closeAct->setEnabled(true);
+	}
+	else
+	{
+		zoomInAct->setEnabled(false);
+		zoomOutAct->setEnabled(false);
+		normalSizeAct->setEnabled(false);
+		fitToWindowAct->setEnabled(false);
+		fitToWindowAct->setChecked(false);
+		autoPlayAct->setEnabled(false);
+		closeAct->setEnabled(false);
+	}
+}
+
+void AsfViewer::updateAllUi()
+{
+	updateActions();
+	if (isFileOpen)
+	{
+		lblFrameCount->setText( tr("COUNT %1").arg(asfFile->count()) );
+		lblRows->setText( tr("ROWS %1").arg(asfFile->rows()) );
+		lblCols->setText( tr("COLS %1").arg(asfFile->cols()) );
+		frameNumEdt->setEnabled(true);
+	}
+	else{
+		lblFrameCount->setText( tr("COUNT %1").arg(0) );
+		lblRows->setText( tr("ROWS %1").arg(0) );
+		lblCols->setText( tr("COLS %1").arg(0) );
+		
+		imageLabel->clear();
+
+		firstFrameBtn->setEnabled(false);
+		prevFrameBtn->setEnabled(false);
+		nextFrameBtn->setEnabled(false);
+		lastFrameBtn->setEnabled(false);
+		frameNumEdt->clear();
+		frameNumEdt->setEnabled(false);
+	}
+}
+
+void AsfViewer::updateButtonsRow()
+{
+	if (currentFrameNumber == 1) {
+		firstFrameBtn->setEnabled(false);
+		prevFrameBtn->setEnabled(false);
+		lastFrameBtn->setEnabled(true);
+		nextFrameBtn->setEnabled(true);
+	}
+	else if (currentFrameNumber == asfFile->size()){
+		firstFrameBtn->setEnabled(true);
+		prevFrameBtn->setEnabled(true);
+		lastFrameBtn->setEnabled(false);
+		nextFrameBtn->setEnabled(false);
+		timer->stop();
+	}
+	else
+	{
+		firstFrameBtn->setEnabled(true);
+		prevFrameBtn->setEnabled(true);
+		lastFrameBtn->setEnabled(true);
+		nextFrameBtn->setEnabled(true);
+	}
+
+	frameNumEdt->setText(QString::number(currentFrameNumber));
+
+}
+
+void AsfViewer::updateCurrentFrame()
+{
+	imageLabel->setPixmap(QPixmap::fromImage(**currentFrame));
+}
+
+AsfViewer::~AsfViewer()
+{
+
 }
