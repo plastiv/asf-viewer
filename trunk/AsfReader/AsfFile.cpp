@@ -4,40 +4,40 @@
 namespace Asf {
 
 AsfFile::AsfFile( std::istream& inputStream ) : FRAME_SEPARATOR("")
-	// read the lines from inputStream to "lines"
-	// find the frames in the lines and compose them in "frames"
-	// assume every message is separated by blank "" line
+	// read string by string from inputStream
+	// find the frames and compose them in "frames"
+	// assume every frame is separated by blank "" line
 {
+	std::clog << "AsfFile constructor start " << std::endl;
+
 	std::string currentLine; // read buffer
 
 	// read header part
 	// Supposed to be from the begging of a file until first blank line
 	// exact size of header may be varied from file to file
-	while (getline(inputStream, currentLine)){
-		if (currentLine == FRAME_SEPARATOR || currentLine.size() == 1){ // end of Header 
-			// TODO : Very bad constants! try to handle situation, when str is from one carriage return symbol 13
-			break;
-		}
-		else 
-			asfHeader.addProperty(currentLine);
+	getline(inputStream, currentLine);
+	while (currentLine.size() > 1){ // end of header 
+		// separator is blank line with zero size
+		// or char 13 symbol
+		asfHeader.addProperty(currentLine);
+		getline(inputStream, currentLine);
 	}
 
-	while (getline(inputStream, currentLine))
-		lines.push_back(currentLine); // build the vector of lines
+	// read frames part
+	while (getline(inputStream, currentLine) && currentLine.size() != 2) {
+		// while str left or @@ - EOF
+		std::shared_ptr<AsfFrame> newFrame(new Asf::AsfFrame());
+		newFrame->addHeaderLine(currentLine);
 
-	//check if last string is a @@
-	if (*(lines.end() - 1) == "@@")
-		*(lines.end() - 1) = ""; // it makes more clear for algorithm; no need special fo EOF
-
-	LineIterator firstFrameLine = lines.begin();
-
-	// build vector of frames
-	for (LineIterator p = firstFrameLine; p!= lines.end(); ++p)
-	{
-		if (*p == FRAME_SEPARATOR || p->at(0) == 13){ // find end of frame
-			frames.push_back(AsfFrame(firstFrameLine, p));
-			firstFrameLine = p + 1; // skip not interesting blank separator line
+		getline(inputStream, currentLine);
+		while (currentLine.size() > 2){ // end of frame 
+			// separator is blank line with zero size
+			// or char 13 symbol
+			newFrame->addPixelsLine(currentLine);
+			getline(inputStream, currentLine);
 		}
+		
+		frames.push_back(newFrame);
 	}
 }
 
@@ -45,13 +45,16 @@ AsfFile::~AsfFile(void) {}
 
 void AsfFile::print( std::ostream & outputStream ) const
 {
+	std::clog << "AsfFile print start " << std::endl;
+
 	asfHeader.print(outputStream);
 
-	// write back lines to ostream (TODO : correct only for Read Only Mode!)
-	for (LineIterator p = lines.begin(); p!= lines.end(); ++p)
+	for (FramePtrIterator it = frames.begin(); it!= frames.end(); ++it)
 	{
-		outputStream << *p << std::endl;
+		(*it)->print(outputStream);
 	}
+
+	outputStream << "@@" << std::endl;
 }
 
 bool AsfFile::isCorrect() const
@@ -66,11 +69,15 @@ bool AsfFile::isCorrect() const
 
 	if (frames.size() != frameCount)
 		return false;
-	else if (frames[0].pixels.size() != rows)
+	else if (frames.at(0)->rows() != rows)
 		return false;
-	else if (frames[0].pixels[0].size() != cols)
+	else if (frames.at(0)->cols() != cols)
 		return false;
-	else
+	else if (frames.at(0)->number() != startFrame)
+		return false;
+	else if ((*(frames.end() - 1))->number() != endFrame)
+		return false;
+	else 
 		return true;
 }
 

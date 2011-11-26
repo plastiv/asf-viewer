@@ -6,7 +6,9 @@
 #include "AsfHeader.h"
 
 namespace Asf {
-typedef std::vector<std::vector<unsigned char>>::const_iterator RowIterator;
+
+typedef std::shared_ptr<std::vector<unsigned char>> RowPtr;
+typedef std::vector<RowPtr>::const_iterator RowPtrIterator;
 
 class AsfFrame
 	// a frame points to the first and the last lines of AsfFile as a raw source of data
@@ -14,16 +16,18 @@ class AsfFrame
 	// TODO : separate classes, that used for different behavior
 {
 public:
-	AsfFrame(LineIterator firstP, LineIterator lastP);
-	RowIterator begin() const {return pixels.begin();}
-	RowIterator end() const {return pixels.end();}
-	std::vector<std::vector<unsigned char>> pixels; // TODO : temp decision to open pixels
+	AsfFrame(void) : number_(0), timeStamp(0), pixels() {}
+	void addHeaderLine(const std::string& headerLine);
+	void addPixelsLine(const std::string& pixelsLine);
+	void print(std::ostream& outputStream) const;
+	size_t rows() const { return pixels.size(); }
+	size_t cols() const { return pixels.at(0)->size(); }
+	size_t number() const { return number_; }
 	~AsfFrame(void);
 private:
-	LineIterator first;
-	LineIterator last;
-
-	size_t number;
+	// TODO : save rows & cols to save consistant reallocation
+	std::vector<RowPtr> pixels;
+	size_t number_;
 	size_t timeStamp; 
 };
 
