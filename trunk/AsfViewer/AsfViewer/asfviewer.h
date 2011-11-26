@@ -14,18 +14,14 @@
 #include <QtGui/QScrollArea>
 #include <QtGui/QScrollBar>
 #include <QtGui/QLineEdit>
-#include <QtGui/QProgressBar>
-#include "ui_asfviewer.h"
+#include <QtGui/QStatusBar>
+#include <QtGui/QMenu>
+#include <QtGui/QAction>
+#include <QtGui/QMenuBar>
 #include "AsfLibraryWrapper.h"
 
 #include <QMainWindow>
 #include <QTimer>
-
-class QAction;
-class QLabel;
-class QMenu;
-class QScrollArea;
-class QScrollBar;
 
 class AsfViewer : public QMainWindow
 {
@@ -38,6 +34,7 @@ public:
 private slots:
 	void open();
 	void closeFile();
+	void saveFile();
 	void zoomIn();
 	void zoomOut();
 	void normalSize();
@@ -82,6 +79,7 @@ private:
 	QLabel *lblCols;
 
 	QAction *openAct;
+	QAction *saveAct;
 	QAction *closeAct;
 	QAction *exitAct;
 	QAction *zoomInAct;

@@ -21,8 +21,11 @@ AsfViewer::AsfViewer(QWidget *parent, Qt::WFlags flags)
 
 void AsfViewer::open()
 {
+	QString filterAsf = "Asf file (*.asf)";
+	QString filterGzip = "GZip file (*.gz)";
+
 	QString fileName = QFileDialog::getOpenFileName(this,
-		tr("Open File"), QDir::currentPath(),"*.asf *.gz");
+		tr("Open File"), QDir::currentPath(), filterAsf + ";;" + filterGzip);
 
 	if (!fileName.isEmpty()) {
 		// file selected
@@ -49,6 +52,25 @@ void AsfViewer::open()
 				tr("Cannot load %1.").arg(fileName));
 			return;
 		}*/
+	}
+}
+
+void AsfViewer::saveFile()
+{
+	QString fileName = QFileDialog::getSaveFileName(
+		this,
+		tr("Select output file name and type"), QDir::currentPath(), "*.asf ;; *.gz");
+
+	if (!fileName.isEmpty()) {
+		// file selected
+		timer->stop();
+
+		if (isFileOpen) {
+			// TODO : add try catch
+			asfFile->saveToFile(fileName);
+		}
+
+		statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
 	}
 }
 
@@ -128,6 +150,11 @@ void AsfViewer::createActions()
 	openAct->setShortcut(tr("Ctrl+O"));
 	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
+	saveAct = new QAction(tr("&Save as..."), this);
+	saveAct->setShortcut(tr("Ctrl+S"));
+	saveAct->setEnabled(false);
+	connect(saveAct, SIGNAL(triggered()), this, SLOT(saveFile()));
+
 	closeAct = new QAction(tr("&Close..."), this);
 	closeAct->setEnabled(false);
 	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeFile()));
@@ -171,6 +198,7 @@ void AsfViewer::createMenus()
 {
 	fileMenu = new QMenu(tr("&File"), this);
 	fileMenu->addAction(openAct);
+	fileMenu->addAction(saveAct);
 	fileMenu->addAction(closeAct);
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
@@ -332,6 +360,7 @@ void AsfViewer::updateActions()
 		normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
 		autoPlayAct->setEnabled(true);
 		closeAct->setEnabled(true);
+		saveAct->setEnabled(true);
 	}
 	else
 	{
@@ -342,6 +371,7 @@ void AsfViewer::updateActions()
 		fitToWindowAct->setChecked(false);
 		autoPlayAct->setEnabled(false);
 		closeAct->setEnabled(false);
+		saveAct->setEnabled(false);
 	}
 }
 

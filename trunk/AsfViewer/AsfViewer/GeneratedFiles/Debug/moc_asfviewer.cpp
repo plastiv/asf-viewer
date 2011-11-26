@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'asfviewer.h'
 **
-** Created: Sat Nov 26 15:29:49 2011
+** Created: Sat Nov 26 19:43:45 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.4)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_AsfViewer[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -34,24 +34,25 @@ static const uint qt_meta_data_AsfViewer[] = {
       11,   10,   10,   10, 0x08,
       18,   10,   10,   10, 0x08,
       30,   10,   10,   10, 0x08,
-      39,   10,   10,   10, 0x08,
-      49,   10,   10,   10, 0x08,
-      62,   10,   10,   10, 0x08,
-      76,   10,   10,   10, 0x08,
-      84,   10,   10,   10, 0x08,
-     104,   10,   10,   10, 0x08,
-     121,   10,   10,   10, 0x08,
-     137,   10,   10,   10, 0x08,
-     153,   10,   10,   10, 0x08,
-     169,   10,   10,   10, 0x08,
+      41,   10,   10,   10, 0x08,
+      50,   10,   10,   10, 0x08,
+      60,   10,   10,   10, 0x08,
+      73,   10,   10,   10, 0x08,
+      87,   10,   10,   10, 0x08,
+      95,   10,   10,   10, 0x08,
+     115,   10,   10,   10, 0x08,
+     132,   10,   10,   10, 0x08,
+     148,   10,   10,   10, 0x08,
+     164,   10,   10,   10, 0x08,
+     180,   10,   10,   10, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_AsfViewer[] = {
-    "AsfViewer\0\0open()\0closeFile()\0zoomIn()\0"
-    "zoomOut()\0normalSize()\0fitToWindow()\0"
-    "about()\0numberEditChanged()\0"
+    "AsfViewer\0\0open()\0closeFile()\0saveFile()\0"
+    "zoomIn()\0zoomOut()\0normalSize()\0"
+    "fitToWindow()\0about()\0numberEditChanged()\0"
     "goToFirstFrame()\0goToPrevFrame()\0"
     "goToNextFrame()\0goToLastFrame()\0"
     "autoPlayFrames()\0"
@@ -88,20 +89,21 @@ int AsfViewer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         switch (_id) {
         case 0: open(); break;
         case 1: closeFile(); break;
-        case 2: zoomIn(); break;
-        case 3: zoomOut(); break;
-        case 4: normalSize(); break;
-        case 5: fitToWindow(); break;
-        case 6: about(); break;
-        case 7: numberEditChanged(); break;
-        case 8: goToFirstFrame(); break;
-        case 9: goToPrevFrame(); break;
-        case 10: goToNextFrame(); break;
-        case 11: goToLastFrame(); break;
-        case 12: autoPlayFrames(); break;
+        case 2: saveFile(); break;
+        case 3: zoomIn(); break;
+        case 4: zoomOut(); break;
+        case 5: normalSize(); break;
+        case 6: fitToWindow(); break;
+        case 7: about(); break;
+        case 8: numberEditChanged(); break;
+        case 9: goToFirstFrame(); break;
+        case 10: goToPrevFrame(); break;
+        case 11: goToNextFrame(); break;
+        case 12: goToLastFrame(); break;
+        case 13: autoPlayFrames(); break;
         default: ;
         }
-        _id -= 13;
+        _id -= 14;
     }
     return _id;
 }

@@ -1,5 +1,5 @@
-#include "AsfLibrary/AsfFile.h"
-#include "AsfLibrary/AsfFileUtilities.h"
+#include "AsfFile.h"
+#include "AsfFileUtilities.h"
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
 

@@ -50,19 +50,19 @@
     <ClCompile Include="GeneratedFiles\qrc_asfviewer.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="AsfLibrary\AsfFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AsfLibrary\AsfFileUtilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AsfLibrary\AsfFrame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AsfLibrary\AsfHeader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AsfLibraryWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfFileUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfHeader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -70,30 +70,24 @@
     <CustomBuild Include="asfviewer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="asfviewer.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="asfviewer.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_asfviewer.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AsfLibrary\AsfFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AsfLibrary\AsfFrame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AsfLibrary\AsfHeader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AsfLibrary\AsfFileUtilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AsfLibraryWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfFileUtilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -58,22 +58,13 @@ AsfFile::AsfFile(const QString& fileName) :asfFile(), frames(),rows_(),cols_(),c
 
 void AsfFile::saveToFile(const QString& fileName)
 {
-	// TODO Make two projects in one!)
+	QByteArray byteArray = fileName.toUtf8();
+	const char* strFileName = byteArray.constData();
 
-
-	//QByteArray byteArray = fileName.toUtf8();
-	//const char* strFileName = byteArray.constData();
-
-	//if (fileName.contains(".gz"))
-	//	Asf::writeToGzipFile(strFileName, asfFile);
-	//else
-	//	asfFile = Asf::createFromFile(strFileName);
-
-	//cols_ = QString::fromStdString(asfFile->getPropertyByName("COLS"));
-	//rows_ = QString::fromStdString(asfFile->getPropertyByName("ROWS"));
-	//count_ = QString::fromStdString(asfFile->getPropertyByName("END_FRAME")); // TODO : not exactly count, but still work
-
-	//frames = *getFramesFromAsfFile();
+	if (fileName.contains(".gz"))
+		Asf::writeToGzipFile(strFileName, asfFile);
+	else
+		Asf::writeToFile(strFileName, asfFile);
 }
 
 void AsfFile::clear()
