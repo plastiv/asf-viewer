@@ -2,11 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsfViewer", "AsfViewer\AsfViewer.vcxproj", "{699BE9F2-6AA7-4B01-8ABC-3552EA14EC53}"
+	ProjectSection(ProjectDependencies) = postProject
+		{236EA314-7FEC-46D3-BCA9-835B730C2E58} = {236EA314-7FEC-46D3-BCA9-835B730C2E58}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B524EE82-F1E7-40B2-A1CA-94CC258117E3}"
 	ProjectSection(SolutionItems) = preProject
 		Performance1.psess = Performance1.psess
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsfReader", "..\AsfReader\AsfReader\AsfReader.vcxproj", "{236EA314-7FEC-46D3-BCA9-835B730C2E58}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -22,6 +27,10 @@ Global
 		{699BE9F2-6AA7-4B01-8ABC-3552EA14EC53}.Debug|Win32.Build.0 = Debug|Win32
 		{699BE9F2-6AA7-4B01-8ABC-3552EA14EC53}.Release|Win32.ActiveCfg = Release|Win32
 		{699BE9F2-6AA7-4B01-8ABC-3552EA14EC53}.Release|Win32.Build.0 = Release|Win32
+		{236EA314-7FEC-46D3-BCA9-835B730C2E58}.Debug|Win32.ActiveCfg = Debug|Win32
+		{236EA314-7FEC-46D3-BCA9-835B730C2E58}.Debug|Win32.Build.0 = Debug|Win32
+		{236EA314-7FEC-46D3-BCA9-835B730C2E58}.Release|Win32.ActiveCfg = Release|Win32
+		{236EA314-7FEC-46D3-BCA9-835B730C2E58}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
