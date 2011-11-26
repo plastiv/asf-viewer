@@ -9,21 +9,17 @@ namespace Asf {
 typedef std::vector<std::string>::const_iterator LineIterator;
 
 class AsfHeader
-	// points to the first and the last lines of AsfFile that are header information
+	// Saves pairs of AsfFile properties and its values
 {
 public:
-	AsfHeader(void) : pattern("([A-Z_]+) (\.+)") {}
-	AsfHeader(LineIterator firstP, LineIterator lastP);
+	AsfHeader(void) : pattern("([A-Z_]+) (.+)") {}
 	void addProperty(const std::string& propertyLine);
-
 	std::string operator[](const std::string& parametr) const { return values.at(parametr); }
+	void print(std::ostream& outputStream) const;
 	~AsfHeader(void){}
 private:
-	LineIterator first;
-	LineIterator last;
-
-	std::tr1::regex pattern;
+	const std::tr1::regex pattern; // TODO : try add to pattern endline character
 	std::map <std::string, std::string> values;
 };
 
-}
+} // end of namespace

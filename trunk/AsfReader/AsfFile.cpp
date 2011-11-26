@@ -3,14 +3,25 @@
 
 namespace Asf {
 
-const std::string AsfFile::FRAME_SEPARATOR = "";
-
-AsfFile::AsfFile( std::istream& inputStream )
+AsfFile::AsfFile( std::istream& inputStream ) : FRAME_SEPARATOR("")
 	// read the lines from inputStream to "lines"
 	// find the frames in the lines and compose them in "frames"
 	// assume every message is separated by blank "" line
 {
-	std::string currentLine;
+	std::string currentLine; // read buffer
+
+	// read header part
+	// Supposed to be from the begging of a file until first blank line
+	// exact size of header may be varied from file to file
+	while (getline(inputStream, currentLine)){
+		if (currentLine == FRAME_SEPARATOR || currentLine.size() == 1){ // end of Header 
+			// TODO : Very bad constants! try to handle situation, when str is from one carriage return symbol 13
+			break;
+		}
+		else 
+			asfHeader.addProperty(currentLine);
+	}
+
 	while (getline(inputStream, currentLine))
 		lines.push_back(currentLine); // build the vector of lines
 
@@ -18,20 +29,7 @@ AsfFile::AsfFile( std::istream& inputStream )
 	if (*(lines.end() - 1) == "@@")
 		*(lines.end() - 1) = ""; // it makes more clear for algorithm; no need special fo EOF
 
-	LineIterator firstFrameLine;
-
-	// find Header lines. Supposed to be from begging of the file until first Frame
-	// exact size of header may be varied from file to file
-	for (LineIterator p = lines.begin(); p!= lines.end(); ++p)
-	{
-		if (*p == FRAME_SEPARATOR || (*p).size() == 1){ // end of Header  // TODO : Very bad constants! try to handle situation, when str is from one carriage return symbol 13
-			asfHeader = AsfHeader(lines.begin(), p);
-			firstFrameLine = p + 1; // done with header, start frames part
-			break;
-		}
-		else 
-			asfHeader.addProperty(*p);
-	}
+	LineIterator firstFrameLine = lines.begin();
 
 	// build vector of frames
 	for (LineIterator p = firstFrameLine; p!= lines.end(); ++p)
@@ -45,8 +43,10 @@ AsfFile::AsfFile( std::istream& inputStream )
 
 AsfFile::~AsfFile(void) {}
 
-void AsfFile::print( std::ostream & outputStream )
+void AsfFile::print( std::ostream & outputStream ) const
 {
+	asfHeader.print(outputStream);
+
 	// write back lines to ostream (TODO : correct only for Read Only Mode!)
 	for (LineIterator p = lines.begin(); p!= lines.end(); ++p)
 	{
@@ -54,7 +54,7 @@ void AsfFile::print( std::ostream & outputStream )
 	}
 }
 
-bool AsfFile::isCorrect()
+bool AsfFile::isCorrect() const
 	// Check is header information equal actual
 {
 	int rows = atoi(asfHeader["ROWS"].c_str());
@@ -72,11 +72,6 @@ bool AsfFile::isCorrect()
 		return false;
 	else
 		return true;
-}
-
-std::string& AsfFile::getPropertyByName(const std::string& propertyName)
-{
-	return asfHeader[propertyName];
 }
 
 } // end of namespace
