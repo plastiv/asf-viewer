@@ -53,21 +53,21 @@
     <ClCompile Include="GeneratedFiles\qrc_AsfViewer.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="AsfLibraryWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_asfviewer.h">
-      <Filter>Generated Files</Filter>
+    <ClInclude Include="AsfLibraryWrapper.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AsfViewer.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="asfviewer.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="AsfViewer.qrc">
       <Filter>Resource Files</Filter>

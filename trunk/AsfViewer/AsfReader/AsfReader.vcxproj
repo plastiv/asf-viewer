@@ -17,7 +17,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -39,6 +39,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\boost\boost_1_47;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\boost\boost_1_47\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -74,6 +76,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsfError.h" />
+    <ClInclude Include="AsfFile.h" />
+    <ClInclude Include="AsfFileUtilities.h" />
+    <ClInclude Include="AsfFrame.h" />
+    <ClInclude Include="AsfHeader.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AsfError.cpp" />
+    <ClCompile Include="AsfFile.cpp" />
+    <ClCompile Include="AsfFileUtilities.cpp" />
+    <ClCompile Include="AsfFrame.cpp" />
+    <ClCompile Include="AsfHeader.cpp" />
+    <ClCompile Include="AsfReader.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\example1.asf" />
+    <None Include="Data\example2 - corrected.asf" />
+    <None Include="Data\example2.asf" />
+    <None Include="Data\example3.asf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
