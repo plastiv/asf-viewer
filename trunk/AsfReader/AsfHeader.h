@@ -6,8 +6,6 @@
 
 namespace Asf {
 
-typedef std::vector<std::string>::const_iterator LineIterator;
-
 class AsfHeader
 	// Saves pairs of AsfFile properties and its values
 {

@@ -3,7 +3,7 @@
 
 namespace Asf {
 
-AsfFile::AsfFile( std::istream& inputStream ) : FRAME_SEPARATOR("")
+AsfFile::AsfFile( std::istream& inputStream )
 	// read string by string from inputStream
 	// find the frames and compose them in "frames"
 	// assume every frame is separated by blank "" line
@@ -54,7 +54,7 @@ void AsfFile::print( std::ostream & outputStream ) const
 		(*it)->print(outputStream);
 	}
 
-	outputStream << "@@" << std::endl;
+	//outputStream << "@@" << std::endl;
 }
 
 bool AsfFile::isCorrect() const

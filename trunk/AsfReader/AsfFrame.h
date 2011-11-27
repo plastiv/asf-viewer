@@ -23,6 +23,8 @@ public:
 	size_t rows() const { return pixels.size(); }
 	size_t cols() const { return pixels.at(0)->size(); }
 	size_t number() const { return number_; }
+	RowPtrIterator begin() const { return pixels.begin(); }
+	RowPtrIterator end() const { return pixels.end(); }
 	~AsfFrame(void);
 private:
 	// TODO : save rows & cols to save consistant reallocation

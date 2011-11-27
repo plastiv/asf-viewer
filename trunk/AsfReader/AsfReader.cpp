@@ -41,10 +41,10 @@ void testFile(const char * fileName, const char * saveFileName, TestMode mode)
 
 void testAsfFile()
 {
-	char* inputFileName = ".\\Data\\Pure\\example1.asf";
-	char* outputFileNameToSave = ".\\Data\\Save\\example1.asf";
-	char* outputFileNameGzip = ".\\Data\\GZip\\example1.gz";
-	char* outputFileNameGzipFile = ".\\Data\\GZip\\example1.asf";
+	char* inputFileName = ".\\Data\\Pure\\example3.asf";
+	char* outputFileNameToSave = ".\\Data\\Save\\example3.asf";
+	char* outputFileNameGzip = ".\\Data\\GZip\\example3.gz";
+	char* outputFileNameGzipFile = ".\\Data\\GZip\\example3.asf";
 	
 	testFile(inputFileName, outputFileNameToSave, ReadFileWriteFile);
 	testFile(outputFileNameToSave, outputFileNameGzip, ReadFileWriteGzip);

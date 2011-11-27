@@ -16,14 +16,13 @@ class AsfFile
 {
 public:
 	AsfFile(std::istream& inputStream); // read istream into lines
-	//FrameIterator begin() const { return frames.begin(); }
-	//FrameIterator end() const { return frames.end(); }
+	FramePtrIterator begin() const { return frames.begin(); }
+	FramePtrIterator end() const { return frames.end(); }
 	void print(std::ostream & outputStream) const;
-	std::string& getPropertyByName (const std::string& propertyName) const { return asfHeader[propertyName]; }
+	std::string getPropertyByName (const std::string& propertyName) const { return asfHeader[propertyName]; }
 	bool isCorrect() const;
 	~AsfFile(void);
 private:
-	const std::string FRAME_SEPARATOR;
 	std::vector<FramePtr> frames; // frames in order
 	AsfHeader asfHeader;
 };
