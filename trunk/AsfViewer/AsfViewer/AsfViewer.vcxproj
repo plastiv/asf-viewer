@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfError.cpp" />
     <ClCompile Include="..\..\AsfReader\AsfReader\AsfFile.cpp" />
     <ClCompile Include="..\..\AsfReader\AsfReader\AsfFileUtilities.cpp" />
     <ClCompile Include="..\..\AsfReader\AsfReader\AsfFrame.cpp" />
@@ -112,6 +113,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfError.h" />
     <ClInclude Include="..\..\AsfReader\AsfReader\AsfFile.h" />
     <ClInclude Include="..\..\AsfReader\AsfReader\AsfFileUtilities.h" />
     <ClInclude Include="..\..\AsfReader\AsfReader\AsfFrame.h" />

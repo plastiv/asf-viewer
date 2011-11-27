@@ -37,7 +37,20 @@ void AsfViewer::open()
 			delete asfFile;
 		}
 
-		asfFile = new AsfFile(fileName); // open file // TODO : check exeption here
+		try {
+			asfFile = new AsfFile(fileName); // open file
+		}
+		catch (std::exception& e) {
+			QMessageBox::information(this, tr("Asf Viewer"),
+				tr("Cannot open file: \n%1\n\n Error message:\n %2").arg(fileName).arg(e.what()));
+			return;
+		}
+		catch (...) {
+			QMessageBox::information(this, tr("Asf Viewer"),
+				tr("Cannot open file: \n%1\n\n Unknown error").arg(fileName));
+			return;
+		}
+
 		isFileOpen = true;
 
 		goToFirstFrame();
@@ -46,12 +59,6 @@ void AsfViewer::open()
 		fitToWindowAct->trigger(); // force image to fit window
 		scaleFactor = 1.0; // reset Zoom to 100%
 		statusBar()->showMessage(tr("Opened '%1'").arg(fileName), 2000);
-		
-		/*if (image.isNull()) {
-			QMessageBox::information(this, tr("Asf Viewer"),
-				tr("Cannot load %1.").arg(fileName));
-			return;
-		}*/
 	}
 }
 
@@ -61,13 +68,22 @@ void AsfViewer::saveFile()
 		this,
 		tr("Select output file name and type"), QDir::currentPath(), "*.asf ;; *.gz");
 
-	if (!fileName.isEmpty()) {
+	if (!fileName.isEmpty() && isFileOpen) {
 		// file selected
 		timer->stop();
 
-		if (isFileOpen) {
-			// TODO : add try catch
-			asfFile->saveToFile(fileName);
+		try {
+			asfFile->saveToFile(fileName); // save file
+		}
+		catch (std::exception& e) {
+			QMessageBox::information(this, tr("Asf Viewer"),
+				tr("Cannot save file: \n%1\n\n Error message:\n %2").arg(fileName).arg(e.what()));
+			return;
+		}
+		catch (...) {
+			QMessageBox::information(this, tr("Asf Viewer"),
+				tr("Cannot save file: \n%1\n\n Unknown error").arg(fileName));
+			return;
 		}
 
 		statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
@@ -272,7 +288,7 @@ void AsfViewer::createStatusBar()
 	lblFrameCount->setMinimumSize( lblFrameCount->sizeHint() );
 	lblFrameCount->setAlignment( Qt::AlignCenter );
 	lblFrameCount->setText( tr("COUNT %1").arg(0) );
-	lblFrameCount->setToolTip( tr("Count of pixel columns in one frame.") );
+	lblFrameCount->setToolTip( tr("Count of frames in one file.") );
 	statusBar->addPermanentWidget( lblFrameCount );
 
 	lblRows = new QLabel( tr("  ROWS COUNT ") );

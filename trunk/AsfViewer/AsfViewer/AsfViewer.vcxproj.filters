@@ -65,6 +65,9 @@
     <ClCompile Include="..\..\AsfReader\AsfReader\AsfHeader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\AsfReader\AsfReader\AsfError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="asfviewer.h">
@@ -88,6 +91,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\AsfReader\AsfReader\AsfHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\AsfReader\AsfReader\AsfError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

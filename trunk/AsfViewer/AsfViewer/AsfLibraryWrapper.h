@@ -11,6 +11,7 @@
 
 class AsfFile{
 	// include here only interested for GUI fields from AsfFile
+	// TODO : build QImage frame by frame, cause it cost a lot of memory
 public:
 	AsfFile(const QString& fileName);
 	void saveToFile(const QString& fileName);
@@ -20,16 +21,16 @@ public:
 	int size() const {return frames.size();}
 	void clear();
 
-	const QString rows() {return rows_; }
-	const QString cols() {return cols_; }
-	const QString count() {return count_; }
-	~AsfFile();
+	QString rows() {return QString::number(rows_); }
+	QString cols() {return QString::number(cols_); }
+	QString count() {return QString::number(count_); }
+	~AsfFile() { clear(); }
 private:
 	QVector<QImage*> frames;
 	std::tr1::shared_ptr<Asf::AsfFile> asfFile;
-	QString rows_;
-	QString cols_;
-	QString count_;
+	int rows_;
+	int cols_;
+	int count_;
 
-	QVector<QImage*>* getFramesFromAsfFile();
+	void getFramesFromAsfFile();
 };
