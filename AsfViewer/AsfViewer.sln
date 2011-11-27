@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsfReader", "AsfReader\AsfReader.vcxproj", "{AD05D1F8-FAE0-41D6-8ABD-3B601D6663B4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsfViewer", "AsfViewer\AsfViewer.vcxproj", "{3BB10528-5A1F-4CF5-B830-51CE02727B33}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD05D1F8-FAE0-41D6-8ABD-3B601D6663B4} = {AD05D1F8-FAE0-41D6-8ABD-3B601D6663B4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
