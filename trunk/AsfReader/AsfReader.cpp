@@ -6,18 +6,19 @@
 #include "AsfFileUtilities.h"
 #include <time.h>
 
-enum TestMode
-{
+enum TestMode {
 	ReadFileWriteFile,
 	ReadFileWriteGzip,
 	ReadGzipWriteFile,
 	ReadGzipWriteGzip,
 };
 
-void testFile(const char * fileName, const char * saveFileName, TestMode mode)
+void testFile(const char* fileName, const char* saveFileName, TestMode mode)
 {
+	// Read file
+	std::cout << "Read file " << fileName << std::endl;
 	clock_t clockBegin, clockEnd;
-
+	{
 	clockBegin = clock();
 	std::tr1::shared_ptr<Asf::AsfFile> asfFile;
 	if (mode == ReadFileWriteFile || mode == ReadFileWriteGzip)
@@ -26,40 +27,74 @@ void testFile(const char * fileName, const char * saveFileName, TestMode mode)
 		asfFile = Asf::createFromGzipFile(fileName);
 	clockEnd = clock();
 
-	std::cout << "Check that file " << fileName << " is read correctly : " << asfFile->isCorrect() << std::endl;
+	std::cout << "File read correctly: " << asfFile->isCorrect() << std::endl;
 	std::cout << "Perfomance read time (clocks) " << (clockEnd-clockBegin) << std::endl;
+
+	//Write file
+	std::cout << "Write file " << saveFileName << std::endl;
 
 	clockBegin = clock();
 	if (mode == ReadFileWriteFile || mode == ReadGzipWriteFile)
 		Asf::writeToFile(saveFileName, asfFile);
 	else
-		Asf::writeToGzipFile(saveFileName, asfFile);	
+		Asf::writeToGzipFile(saveFileName, asfFile);
 	clockEnd = clock();
 
 	std::cout << "Perfomance write time (clocks) " << (clockEnd-clockBegin) << std::endl;
+	}
+
+	// Check file
+	std::tr1::shared_ptr<Asf::AsfFile> checkedFile;
+	std::cout << "File write correctly: "; 
+	if (mode == ReadFileWriteFile || mode == ReadGzipWriteFile)
+		checkedFile = Asf::createFromFile(saveFileName);
+	else
+		checkedFile = Asf::createFromGzipFile(saveFileName);
+
+	std::cout << checkedFile->isCorrect() << std::endl;
+	std::cout << std::endl;
 }
 
-void testAsfFile()
+void testAsfFile(const char* inputFileName, const char* inputGzipName)
 {
-	char* inputFileName = ".\\Data\\Pure\\example3.asf";
-	char* outputFileNameToSave = ".\\Data\\Save\\example3.asf";
-	char* outputFileNameGzip = ".\\Data\\GZip\\example3.gz";
-	char* outputFileNameGzipFile = ".\\Data\\GZip\\example3.asf";
-	
-	testFile(inputFileName, outputFileNameToSave, ReadFileWriteFile);
-	testFile(outputFileNameToSave, outputFileNameGzip, ReadFileWriteGzip);
-	testFile(outputFileNameGzip, outputFileNameGzipFile, ReadGzipWriteFile);
+	// test read example files
+	const char* inputFileFileName = inputFileName; // was in example.rar
+	const char* inputGzipFileName = inputGzipName; // made by 7-zip from previous file
+
+	// write .asf files
+	char* outputFileFileName = ".\\Data\\Save\\file_to_file.asf";
+	char* outputGzipFileName = ".\\Data\\Save\\gzip_to_file.asf";
+
+	testFile(inputFileFileName, outputFileFileName, ReadFileWriteFile);
+	testFile(inputGzipFileName, outputGzipFileName, ReadGzipWriteFile);
+
+	// write .gz files
+	char* outputFileGZipName = ".\\Data\\Save\\file_to_gzip.gz";
+	char* outputGzipGzipName = ".\\Data\\Save\\gzip_to_gzip.gz";
+
+	testFile(inputFileFileName, outputFileGZipName, ReadFileWriteGzip);
+	testFile(inputGzipFileName, outputGzipGzipName, ReadGzipWriteGzip);
 }
 
 int main(int argc, char* argv[])
 {
-	// Expected 2 parameters inputFileName.txt outputFileName.txt
-	if (argc != 3) Asf::printError("wrong number of arguments");
+	try {
+		// show path to test data
+		//testAsfFile(".\\Data\\Pure\\example1.asf",".\\Data\\PureGzip\\example1.asf.gz");
+		//testAsfFile(".\\Data\\Pure\\example2.asf",".\\Data\\PureGzip\\example2.asf.gz");
+		testAsfFile(".\\Data\\Pure\\example3.asf",".\\Data\\PureGzip\\example3.asf.gz");
+	}
+	catch (std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return 1;
+	}
+	catch (...) {
+		std::cerr << "Unknown error: " << std::endl;
+		return 2;
+	}
 
-	testAsfFile();
-
-	int wait;
-	std::cin >> wait;
+	/*int wait;
+	std::cin >> wait;*/
 	return 0;
 }
 

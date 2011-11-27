@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "AsfError.h"
 #include <string>
 #include <regex>
 #include <map>
@@ -14,10 +14,10 @@ public:
 	void addProperty(const std::string& propertyLine);
 	std::string operator[](const std::string& parametr) const { return values.at(parametr); }
 	void print(std::ostream& outputStream) const;
-	~AsfHeader(void){}
+	~AsfHeader(void) {}
 private:
-	const std::tr1::regex pattern; // TODO : try add to pattern endline character
-	std::map <std::string, std::string> values;
+	const std::tr1::regex pattern;
+	std::map<std::string, std::string> values;
 };
 
 } // end of namespace

@@ -1,9 +1,10 @@
 #pragma once
+#include "AsfError.h"
 #include <vector>
 #include <string>
 #include <sstream>
 #include <regex>
-#include "AsfHeader.h"
+#include <iostream> // For clog only
 
 namespace Asf {
 
@@ -11,12 +12,11 @@ typedef std::shared_ptr<std::vector<unsigned char>> RowPtr;
 typedef std::vector<RowPtr>::const_iterator RowPtrIterator;
 
 class AsfFrame
-	// a frame points to the first and the last lines of AsfFile as a raw source of data
-	// and also store a converted values
-	// TODO : separate classes, that used for different behavior
+	// store matrix of pixels brightness values
 {
 public:
-	AsfFrame(void) : number_(0), timeStamp(0), pixels() {}
+	AsfFrame(void) : number_(0), timeStamp(0), cols_(0), pixels() {}
+	AsfFrame(size_t rows, size_t cols);
 	void addHeaderLine(const std::string& headerLine);
 	void addPixelsLine(const std::string& pixelsLine);
 	void print(std::ostream& outputStream) const;
@@ -25,12 +25,12 @@ public:
 	size_t number() const { return number_; }
 	RowPtrIterator begin() const { return pixels.begin(); }
 	RowPtrIterator end() const { return pixels.end(); }
-	~AsfFrame(void);
+	~AsfFrame(void) {}
 private:
-	// TODO : save rows & cols to save consistant reallocation
 	std::vector<RowPtr> pixels;
 	size_t number_;
 	size_t timeStamp; 
+	size_t cols_; // For vector.reserve() to save possible realocations
 };
 
 } // end of namespace

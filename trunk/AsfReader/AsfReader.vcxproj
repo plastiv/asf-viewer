@@ -81,6 +81,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AsfError.h" />
     <ClInclude Include="AsfFile.h" />
     <ClInclude Include="AsfHeader.h" />
     <ClInclude Include="AsfFileUtilities.h" />
@@ -89,6 +90,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AsfError.cpp" />
     <ClCompile Include="AsfFile.cpp" />
     <ClCompile Include="AsfFileUtilities.cpp" />
     <ClCompile Include="AsfHeader.cpp" />

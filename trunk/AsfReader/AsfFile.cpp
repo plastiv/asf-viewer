@@ -8,13 +8,28 @@ AsfFile::AsfFile( std::istream& inputStream )
 	// find the frames and compose them in "frames"
 	// assume every frame is separated by blank "" line
 {
-	std::clog << "AsfFile constructor start " << std::endl;
+	//std::clog << "AsfFile constructor start " << std::endl;
 
-	std::string currentLine; // read buffer
+	readHeader(inputStream);
 
+	//a little bit analyze to save vectors reallocation
+	size_t startFrame = atoi(asfHeader["START_FRAME"].c_str());
+	size_t endFrame = atoi(asfHeader["END_FRAME"].c_str());
+	size_t frameCount = endFrame - startFrame + 1;
+	frames.reserve(frameCount);
+
+	readFrames(inputStream);
+
+	if(!isCorrect()) Asf::error("Cannot read file correctly. Bad data");
+}
+
+void AsfFile::readHeader( std::istream& inputStream )
 	// read header part
 	// Supposed to be from the begging of a file until first blank line
 	// exact size of header may be varied from file to file
+{
+	std::string currentLine; // read buffer
+
 	getline(inputStream, currentLine);
 	while (currentLine.size() > 1){ // end of header 
 		// separator is blank line with zero size
@@ -22,17 +37,26 @@ AsfFile::AsfFile( std::istream& inputStream )
 		asfHeader.addProperty(currentLine);
 		getline(inputStream, currentLine);
 	}
+}
 
+void AsfFile::readFrames( std::istream& inputStream )
 	// read frames part
-	while (getline(inputStream, currentLine) && currentLine.size() != 2) {
-		// while str left or @@ - EOF
-		std::shared_ptr<AsfFrame> newFrame(new Asf::AsfFrame());
+{
+	size_t rows = atoi(asfHeader["ROWS"].c_str()); // for vector.reserve()
+	size_t cols = atoi(asfHeader["COLS"].c_str());
+
+	std::string currentLine; // read buffer
+
+	while (getline(inputStream, currentLine) && currentLine.size() > 3) {
+		// while str left or found @@ - EOF
+		std::shared_ptr<AsfFrame> newFrame(new Asf::AsfFrame(rows, cols));
 		newFrame->addHeaderLine(currentLine);
 
 		getline(inputStream, currentLine);
-		while (currentLine.size() > 2){ // end of frame 
+		while (currentLine.size() > 3){ // end of frame 
 			// separator is blank line with zero size
 			// or char 13 symbol
+			// or @@
 			newFrame->addPixelsLine(currentLine);
 			getline(inputStream, currentLine);
 		}
@@ -41,11 +65,9 @@ AsfFile::AsfFile( std::istream& inputStream )
 	}
 }
 
-AsfFile::~AsfFile(void) {}
-
 void AsfFile::print( std::ostream & outputStream ) const
 {
-	std::clog << "AsfFile print start " << std::endl;
+	//std::clog << "AsfFile print start " << std::endl;
 
 	asfHeader.print(outputStream);
 
@@ -54,11 +76,11 @@ void AsfFile::print( std::ostream & outputStream ) const
 		(*it)->print(outputStream);
 	}
 
-	//outputStream << "@@" << std::endl;
+	//outputStream << "@@" << std::endl; //EOF in case you need it
 }
 
 bool AsfFile::isCorrect() const
-	// Check is header information equal actual
+	// Check if header information equal actual
 {
 	int rows = atoi(asfHeader["ROWS"].c_str());
 	int cols = atoi(asfHeader["COLS"].c_str());
@@ -72,6 +94,10 @@ bool AsfFile::isCorrect() const
 	else if (frames.at(0)->rows() != rows)
 		return false;
 	else if (frames.at(0)->cols() != cols)
+		return false;
+	else if (frames.at(frames.size()-1)->rows() != rows)
+		return false;
+	else if (frames.at(frames.size()-1)->cols() != cols)
 		return false;
 	else if (frames.at(0)->number() != startFrame)
 		return false;
