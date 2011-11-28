@@ -15,16 +15,15 @@ class AsfFile
 	// represent .asf file state in memory
 {
 public:
-	AsfFile(std::istream& inputStream); // read istream into lines
+	AsfFile(std::istream& inputStream); // read istream into frames
 	FramePtrIterator begin() const { return frames.begin(); }
 	FramePtrIterator end() const { return frames.end(); }
 	std::string getPropertyByName (const std::string& propertyName) const { return asfHeader[propertyName]; }
-	void print(std::ostream & outputStream) const;
+	void print(std::ostream& outputStream) const;
 	bool isCorrect() const;
 	~AsfFile(void) {}
 private:
-	void readHeader(std::istream& inputStream);
-	void readFrames(std::istream& inputStream);
+	void readAllFrames(std::istream& inputStream);
 	std::vector<FramePtr> frames; // frames in order
 	AsfHeader asfHeader;
 };

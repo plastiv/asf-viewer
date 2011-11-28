@@ -3,9 +3,28 @@
 
 namespace Asf {
 
-AsfFrame::AsfFrame(size_t rows, size_t cols) : number_(0), timeStamp(0), cols_(cols), pixels()
+AsfFrame::AsfFrame(std::istream& inputStream, size_t rows, size_t cols) : number_(0), timeStamp(0), cols_(cols), pixels(), isCorrect_(false)
 {
 	pixels.reserve(rows);
+
+	std::string currentLine; // read buffer
+	getline(inputStream, currentLine);
+	if (currentLine == "" || currentLine == "@@") // find symbol EOF
+		return; // dont make frame
+	addHeaderLine(currentLine);
+
+	getline(inputStream, currentLine);
+	while (currentLine.size() > 3){ // end of frame 
+		// separator is blank line with zero size
+		// or char 13 symbol
+		// or @@
+		addPixelsLine(currentLine);
+		getline(inputStream, currentLine);
+	}
+
+	if (pixels.size() == rows)
+		if (pixels.at(pixels.size() - 1)->size() == cols)
+			isCorrect_ = true;
 }
 
 void AsfFrame::addHeaderLine(const std::string& headerLine)
