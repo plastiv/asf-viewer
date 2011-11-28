@@ -3,14 +3,12 @@
 
 namespace Asf {
 
-AsfFile::AsfFile( std::istream& inputStream )
+AsfFile::AsfFile( std::istream& inputStream ) : asfHeader(inputStream)
 	// read string by string from inputStream
 	// find the frames and compose them in "frames"
 	// assume every frame is separated by blank "" line
 {
 	//std::clog << "AsfFile constructor start " << std::endl;
-
-	readHeader(inputStream);
 
 	//a little bit analyze to save vectors reallocation
 	size_t startFrame = atoi(asfHeader["START_FRAME"].c_str());
@@ -18,50 +16,25 @@ AsfFile::AsfFile( std::istream& inputStream )
 	size_t frameCount = endFrame - startFrame + 1;
 	frames.reserve(frameCount);
 
-	readFrames(inputStream);
+	readAllFrames(inputStream);
 
 	if(!isCorrect()) Asf::error("Cannot read file correctly. Bad data");
 }
 
-void AsfFile::readHeader( std::istream& inputStream )
-	// read header part
-	// Supposed to be from the begging of a file until first blank line
-	// exact size of header may be varied from file to file
-{
-	std::string currentLine; // read buffer
-
-	getline(inputStream, currentLine);
-	while (currentLine.size() > 1){ // end of header 
-		// separator is blank line with zero size
-		// or char 13 symbol
-		asfHeader.addProperty(currentLine);
-		getline(inputStream, currentLine);
-	}
-}
-
-void AsfFile::readFrames( std::istream& inputStream )
+void AsfFile::readAllFrames( std::istream& inputStream )
 	// read frames part
 {
 	size_t rows = atoi(asfHeader["ROWS"].c_str()); // for vector.reserve()
 	size_t cols = atoi(asfHeader["COLS"].c_str());
 
-	std::string currentLine; // read buffer
-
-	while (getline(inputStream, currentLine) && currentLine.size() > 3) {
+	bool isMoreFrames = true;
+	while (isMoreFrames) {
 		// while str left or found @@ - EOF
-		std::shared_ptr<AsfFrame> newFrame(new Asf::AsfFrame(rows, cols));
-		newFrame->addHeaderLine(currentLine);
-
-		getline(inputStream, currentLine);
-		while (currentLine.size() > 3){ // end of frame 
-			// separator is blank line with zero size
-			// or char 13 symbol
-			// or @@
-			newFrame->addPixelsLine(currentLine);
-			getline(inputStream, currentLine);
-		}
-		
-		frames.push_back(newFrame);
+		std::shared_ptr<AsfFrame> newFrame(new Asf::AsfFrame(inputStream, rows, cols));
+		if (newFrame->isCorrect())
+			frames.push_back(newFrame);
+		else
+			isMoreFrames = false;
 	}
 }
 

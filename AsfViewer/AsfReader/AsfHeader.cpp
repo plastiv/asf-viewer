@@ -3,6 +3,22 @@
 
 namespace Asf {
 
+AsfHeader::AsfHeader(std::istream& inputStream) : pattern("([A-Z_]+) (.+)")
+	// read header part
+	// Supposed to be from the begging of a file until first blank line
+	// exact size of header may be varied from file to file
+{
+	std::string currentLine; // read buffer
+
+	getline(inputStream, currentLine);
+	while (currentLine.size() > 1) { // end of header 
+		// separator is blank line with zero size
+		// or char 13 symbol
+		addProperty(currentLine);
+		getline(inputStream, currentLine);
+	}
+}
+
 void AsfHeader::addProperty(const std::string& propertyLine)
 	// By default propertyLine pattern is PROPERTY_NAME Value
 {

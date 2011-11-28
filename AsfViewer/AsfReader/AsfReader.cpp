@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
 		// input path to test data
 		//testAsfFile(".\\Data\\example1.asf",".\\Data\\example1.asf.gz");
 		//testAsfFile(".\\Data\\example2.asf",".\\Data\\example2.asf.gz");
+		//testAsfFile(".\\Data\\example2 - corrected.asf",".\\Data\\example2 - corrected.asf.gz");
 		testAsfFile(".\\Data\\example3.asf",".\\Data\\example3.asf.gz");
 	}
 	catch (std::exception& e) {
