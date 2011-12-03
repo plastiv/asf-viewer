@@ -5,13 +5,15 @@ namespace Asf {
 
 AsfFrame::AsfFrame(std::istream& inputStream, size_t rows, size_t cols) : number_(0), timeStamp(0), cols_(cols), pixels(), isCorrect_(false)
 {
-	pixels.reserve(rows);
-
 	std::string currentLine; // read buffer
 	getline(inputStream, currentLine);
-	if (currentLine == "" || currentLine == "@@") // find symbol EOF
+
+	if (currentLine.size() < 3) // find symbol EOF
+	// could be quicker than (currentLine == "" || currentLine == "@@")
 		return; // dont make frame
 	addHeaderLine(currentLine);
+
+	pixels.reserve(rows);
 
 	getline(inputStream, currentLine);
 	while (currentLine.size() > 3){ // end of frame 

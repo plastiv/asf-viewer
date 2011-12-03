@@ -1,6 +1,9 @@
 #ifndef ASFVIEWER_H
 #define ASFVIEWER_H
 
+#include "AsfLibraryWrapper.h"
+#include "ReadWriteThread.h"
+
 #include <QtGui/QMainWindow>
 #include <QtGui/QPushButton>
 #include <QtGui/QVBoxLayout>
@@ -18,9 +21,8 @@
 #include <QtGui/QMenu>
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
-#include "AsfLibraryWrapper.h"
 
-#include <QMainWindow>
+#include <QEvent>
 #include <QTimer>
 
 class AsfViewer : public QMainWindow
@@ -29,7 +31,7 @@ class AsfViewer : public QMainWindow
 
 public:
 	AsfViewer(QWidget *parent = 0, Qt::WFlags flags = 0);
-	~AsfViewer();
+	~AsfViewer() {}
 
 private slots:
 	void open();
@@ -58,12 +60,14 @@ private:
 	void scaleImage(double factor);
 	void adjustScrollBar(QScrollBar *scrollBar, double factor);
 	void goToFrame(const int frameNumber);
+	void customEvent (QEvent *event);
 
 	double scaleFactor;
 	QVector<QImage*>::const_iterator currentFrame;
 	int currentFrameNumber;
-	AsfFile* asfFile; // keep data in pool, all usage throw iterator
+	QAsfFile* asfFile; // keep data in pool, all usage throw iterator
 	bool isFileOpen;
+	OpenFileThread openFileThread;
 
 	QLabel *imageLabel;
 	QScrollArea *scrollArea;
