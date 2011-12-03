@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "AsfLibraryWrapper.h"
 
-void AsfFile::getFramesFromAsfFile()
+void QAsfFile::getFramesFromAsfFile()
 {
 	// Build greyscale color table
 	QVector<QRgb> grayscale;
@@ -41,7 +41,7 @@ void AsfFile::getFramesFromAsfFile()
 	}
 }
 
-AsfFile::AsfFile(const QString& fileName) :asfFile(), frames(),rows_(0),cols_(0),count_(0)
+QAsfFile::QAsfFile(const QString& fileName) :asfFile(), frames(),rows_(0),cols_(0),count_(0)
 {
 	QByteArray byteArray = fileName.toUtf8();
 	const char* strFileName = byteArray.constData(); // safe conversion
@@ -60,7 +60,7 @@ AsfFile::AsfFile(const QString& fileName) :asfFile(), frames(),rows_(0),cols_(0)
 	getFramesFromAsfFile();
 }
 
-void AsfFile::saveToFile(const QString& fileName)
+void QAsfFile::saveToFile(const QString& fileName)
 	// write data to file
 	// in read only mode useful only for conversion from .asf to .gz and back
 {
@@ -73,7 +73,7 @@ void AsfFile::saveToFile(const QString& fileName)
 		Asf::writeToFile(strFileName, asfFile);
 }
 
-void AsfFile::clear()
+void QAsfFile::clear()
 	// clean memory
 {
 	if (!frames.empty()) {

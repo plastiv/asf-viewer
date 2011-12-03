@@ -11,13 +11,15 @@ AsfViewer::AsfViewer(QWidget *parent, Qt::WFlags flags)
 	createStatusBar();
 
 	isFileOpen = false; // flag is using for enabling/disabling buttons
+	openFileThread.setTargetWidget(this);
+
 	timer = new QTimer(this); // change frames automatically
 	connect(timer, SIGNAL(timeout()), this, SLOT(goToNextFrame()));
 
 	setWindowTitle(tr("Asf Viewer"));
 	resize(400, 400);
 
-	statusBar()->showMessage( tr("Open file"), 5000 );
+	statusBar()->showMessage( tr("Ready for open file"), 5000 );
 }
 
 void AsfViewer::open()
@@ -38,28 +40,11 @@ void AsfViewer::open()
 			delete asfFile;
 		}
 
-		try {
-			asfFile = new AsfFile(fileName); // open file
-		}
-		catch (std::exception& e) {
-			QMessageBox::information(this, tr("Asf Viewer"),
-				tr("Cannot open file: \n%1\n\n Error message:\n %2").arg(fileName).arg(e.what()));
-			return;
-		}
-		catch (...) {
-			QMessageBox::information(this, tr("Asf Viewer"),
-				tr("Cannot open file: \n%1\n\n Unknown error").arg(fileName));
-			return;
-		}
+		if (openFileThread.isRunning())
+			openFileThread.quit();
 
-		isFileOpen = true;
-
-		goToFirstFrame();
-		updateAllUi();
-
-		fitToWindowAct->trigger(); // force image to fit window
-		scaleFactor = 1.0; // reset Zoom to 100%
-		statusBar()->showMessage(tr("Opened '%1'").arg(fileName), 2000);
+		openFileThread.setFileName(fileName);
+		openFileThread.start(QThread::NormalPriority);
 	}
 }
 
@@ -153,6 +138,7 @@ void AsfViewer::about()
 	QMessageBox::about(this, tr("About Asf Viewer"),
 		tr("<p>The <b>Asf Viewer</b> read .asf files, that are simple "
 		"containers for a gray scaled frames (kind of video file). </p><p>"
+		"Project page is on <a href=\"http://code.google.com/p/asf-viewer/\">code.google</a></p><p>"
 		"Made by Sergii Pechenizkyi for Codeminders test task.</p>"));
 }
 
@@ -395,14 +381,13 @@ void AsfViewer::updateActions()
 void AsfViewer::updateAllUi()
 {
 	updateActions();
-	if (isFileOpen)
-	{
+	if (isFileOpen) {
 		lblFrameCount->setText( tr("COUNT %1").arg(asfFile->count()) );
 		lblRows->setText( tr("ROWS %1").arg(asfFile->rows()) );
 		lblCols->setText( tr("COLS %1").arg(asfFile->cols()) );
 		frameNumEdt->setEnabled(true);
 	}
-	else{
+	else {
 		lblFrameCount->setText( tr("COUNT %1").arg(0) );
 		lblRows->setText( tr("ROWS %1").arg(0) );
 		lblCols->setText( tr("COLS %1").arg(0) );
@@ -450,7 +435,26 @@ void AsfViewer::updateCurrentFrame()
 	imageLabel->setPixmap(QPixmap::fromImage(**currentFrame));
 }
 
-AsfViewer::~AsfViewer()
+void AsfViewer::customEvent (QEvent *event)
 {
+	if ((int)event->type() == FileActionStart) {
+		isFileOpen = false;
+		updateAllUi();
+		statusBar()->showMessage(tr("Working..."), 10000);
+	} else if ((int)event->type() == AllFileActionsDone) {
+		isFileOpen = true;
+		asfFile = openFileThread.asfFile();
+		goToFirstFrame();
+		updateAllUi();
 
+		fitToWindowAct->trigger(); // force image to fit window
+		scaleFactor = 1.0; // reset Zoom to 100%
+		statusBar()->showMessage(tr("Opened."), 2000);
+	} else if ((int)event->type() == FileActionError) {
+		ErrorEvent *errorEvent = (ErrorEvent *)event;
+		QMessageBox::information(this, tr("Asf Viewer"),
+			tr("Cannot open file. Error message:\n %1").arg(errorEvent->message));
+	} else {
+		QMainWindow::customEvent(event);
+	}
 }
